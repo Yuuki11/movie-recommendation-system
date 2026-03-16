@@ -86,16 +86,16 @@
       </div>
       <div class="metrics">
         <div class="metric-card">
-          <span>Candidate Pool</span>
-          <strong>{{ results.metrics.candidate_pool }}</strong>
+          <span>Train Accuracy</span>
+          <strong>{{ results.metrics.training_accuracy }}%</strong>
         </div>
         <div class="metric-card">
-          <span>Positive Labels</span>
-          <strong>{{ results.metrics.positive_examples }}</strong>
+          <span>Test Accuracy</span>
+          <strong>{{ results.metrics.test_accuracy }}%</strong>
         </div>
         <div class="metric-card">
-          <span>Negative Labels</span>
-          <strong>{{ results.metrics.negative_examples }}</strong>
+          <span>Train/Test Split</span>
+          <strong>{{ results.metrics.train_size }}/{{ results.metrics.test_size }}</strong>
         </div>
       </div>
     </div>
@@ -109,8 +109,8 @@
             <p class="movie-year">{{ movie.year }}</p>
           </div>
           <div class="score-badge">
-            <span>Score</span>
-            <strong>{{ movie.recommendation_score }}%</strong>
+            <span>Match</span>
+            <strong>{{ movie.match_probability }}%</strong>
           </div>
         </div>
         <p class="movie-genres">{{ movie.genre_display }}</p>

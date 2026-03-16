@@ -37,7 +37,7 @@ class MovieRecommender:
             avoided=avoided,
             minimum_rating=minimum_rating,
         )
-        model, validation_accuracy, training_accuracy = self._fit_model(labels)
+        model, training_accuracy, test_accuracy, train_size, test_size = self._fit_model(labels)
         probabilities = model.predict_proba(self.feature_frame)[:, 1]
 
         ranked_movies = self.movies.copy()
@@ -47,24 +47,6 @@ class MovieRecommender:
         )
         ranked_movies["avoided_match_count"] = ranked_movies["genre_list"].apply(
             lambda genres: len(avoided.intersection(genres))
-        )
-        ranked_movies["preference_alignment"] = ranked_movies["liked_match_count"].apply(
-            lambda count: self._preference_alignment(count, preferred)
-        )
-        ranked_movies["quality_signal"] = ranked_movies["imdb_rating"].apply(
-            lambda rating: self._normalize_quality(rating)
-        )
-        ranked_movies["popularity_signal"] = ranked_movies["popularity"].apply(
-            lambda popularity: min(float(popularity) / 100.0, 1.0)
-        )
-        ranked_movies["recommendation_score"] = ranked_movies.apply(
-            lambda row: self._build_recommendation_score(
-                model_probability=row.match_probability,
-                preference_alignment=row.preference_alignment,
-                quality_signal=row.quality_signal,
-                popularity_signal=row.popularity_signal,
-            ),
-            axis=1,
         )
 
         candidate_mask = (~avoided_mask) & (
@@ -76,13 +58,12 @@ class MovieRecommender:
         candidates = ranked_movies.loc[candidate_mask].copy()
         candidates = candidates.sort_values(
             by=[
-                "recommendation_score",
                 "match_probability",
                 "liked_match_count",
                 "imdb_rating",
                 "popularity",
             ],
-            ascending=[False, False, False, False, False],
+            ascending=[False, False, False, False],
         )
 
         recommendations = [
@@ -94,7 +75,6 @@ class MovieRecommender:
                 "imdb_rating": round(float(row.imdb_rating), 1),
                 "popularity": int(row.popularity),
                 "match_probability": round(float(row.match_probability) * 100, 1),
-                "recommendation_score": round(float(row.recommendation_score), 1),
                 "reason": self._build_reason(
                     genre_list=row.genre_list,
                     liked_matches=row.liked_match_count,
@@ -108,7 +88,9 @@ class MovieRecommender:
 
         metrics = {
             "training_accuracy": round(float(training_accuracy) * 100, 1),
-            "validation_accuracy": round(float(validation_accuracy) * 100, 1),
+            "test_accuracy": round(float(test_accuracy) * 100, 1),
+            "train_size": int(train_size),
+            "test_size": int(test_size),
             "candidate_pool": int(len(candidates)),
             "positive_examples": int(labels.sum()),
             "negative_examples": int((1 - labels).sum()),
@@ -160,7 +142,7 @@ class MovieRecommender:
         pipeline = Pipeline(
             steps=[
                 ("scale", StandardScaler()),
-                ("model", LogisticRegression(C=0.35, max_iter=1000)),
+                ("model", LogisticRegression(C=0.2, max_iter=1000)),
             ]
         )
         stratify_labels = labels if labels.nunique() > 1 else None
@@ -174,39 +156,19 @@ class MovieRecommender:
                 stratify=stratify_labels,
             )
             pipeline.fit(train_features, train_labels)
-            validation_accuracy = pipeline.score(test_features, test_labels)
             training_accuracy = pipeline.score(train_features, train_labels)
-            pipeline.fit(self.feature_frame, labels)
-            return pipeline, validation_accuracy, training_accuracy
+            test_accuracy = pipeline.score(test_features, test_labels)
+            return (
+                pipeline,
+                training_accuracy,
+                test_accuracy,
+                len(train_features),
+                len(test_features),
+            )
 
         pipeline.fit(self.feature_frame, labels)
         fallback_accuracy = pipeline.score(self.feature_frame, labels)
-        return pipeline, fallback_accuracy, fallback_accuracy
-
-    @staticmethod
-    def _preference_alignment(liked_matches, preferred):
-        if not preferred:
-            return 0.6
-        return min(float(liked_matches) / float(len(preferred)), 1.0)
-
-    @staticmethod
-    def _normalize_quality(imdb_rating):
-        return min(max((float(imdb_rating) - 5.0) / 4.5, 0.0), 1.0)
-
-    @staticmethod
-    def _build_recommendation_score(
-        model_probability,
-        preference_alignment,
-        quality_signal,
-        popularity_signal,
-    ):
-        weighted_score = (
-            model_probability * 0.45
-            + preference_alignment * 0.25
-            + quality_signal * 0.2
-            + popularity_signal * 0.1
-        )
-        return min(weighted_score * 100.0, 99.5)
+        return pipeline, fallback_accuracy, fallback_accuracy, len(self.feature_frame), 0
 
     @staticmethod
     def _build_reason(

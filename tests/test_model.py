@@ -12,7 +12,7 @@ def test_recommender_returns_requested_number_of_movies():
 
     assert len(results.recommendations) == 5
     assert all("Horror" not in movie["genres"] for movie in results.recommendations)
-    assert all(movie["recommendation_score"] < 100 for movie in results.recommendations)
+    assert all("match_probability" in movie for movie in results.recommendations)
 
 
 def test_recommender_falls_back_without_explicit_preferences():
@@ -26,4 +26,4 @@ def test_recommender_falls_back_without_explicit_preferences():
 
     assert len(results.recommendations) == 3
     assert results.metrics["positive_examples"] > 0
-    assert "validation_accuracy" in results.metrics
+    assert "test_accuracy" in results.metrics

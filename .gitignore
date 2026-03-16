@@ -1,4 +1,5 @@
 .venv/
+.venv2020/
 __pycache__/
 **/__pycache__/
 *.pyc
