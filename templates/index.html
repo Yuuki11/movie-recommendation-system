@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="page-shell" data-has-results="{% if results %}true{% else %}false{% endif %}">
+  <section class="hero">
+    <p class="eyebrow">Python 3.8 + Flask 1.1 + Logistic Regression</p>
+    <h1>Movie Recommendation System</h1>
+    <p class="hero-copy">
+      Choose the genres you like, mark what you want to avoid, and the model will
+      rank movies by predicted match probability.
+    </p>
+    <p class="data-source">Current data source: {{ dataset_source }}</p>
+  </section>
+
+  <section class="panel">
+    <form method="post" action="{{ url_for('recommend') }}" class="preferences-form">
+      <div class="panel-header">
+        <div>
+          <h2>Build Your Taste Profile</h2>
+          <p>Click a genre chip to cycle through neutral, like, and avoid.</p>
+        </div>
+        <div class="legend">
+          <span class="legend-pill neutral">Neutral</span>
+          <span class="legend-pill like">Like</span>
+          <span class="legend-pill avoid">Avoid</span>
+        </div>
+      </div>
+
+      <div
+        class="genre-grid"
+        data-preferred="{{ selections.preferred_genres | join(',') }}"
+        data-avoided="{{ selections.avoided_genres | join(',') }}"
+      >
+        {% for genre in genres %}
+        <button type="button" class="genre-chip" data-genre="{{ genre }}">
+          <span>{{ genre }}</span>
+          <small class="chip-state">Neutral</small>
+        </button>
+        {% endfor %}
+      </div>
+
+      <input type="hidden" name="preferred_genres" id="preferred_genres" />
+      <input type="hidden" name="avoided_genres" id="avoided_genres" />
+
+      <div class="control-row">
+        <label>
+          <span>Minimum IMDb rating</span>
+          <input
+            type="range"
+            name="minimum_rating"
+            min="5.5"
+            max="9.0"
+            step="0.1"
+            value="{{ selections.minimum_rating }}"
+            id="minimum_rating"
+          />
+          <strong id="minimum_rating_value">{{ '%.1f'|format(selections.minimum_rating) }}</strong>
+        </label>
+
+        <label>
+          <span>Recommendations</span>
+          <select name="top_n">
+            {% for count in [3, 5, 7, 10] %}
+            <option value="{{ count }}" {% if selections.top_n == count %}selected{% endif %}>
+              Top {{ count }}
+            </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <div class="action-group">
+          <button type="submit" class="submit-button">Recommend Movies</button>
+          <a href="{{ url_for('index') }}" class="reset-button">Clear Selection</a>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  {% if results %}
+  <section class="results">
+    <div class="results-header">
+      <div>
+        <p class="eyebrow">Model Summary</p>
+        <h2>Recommended Titles</h2>
+        <p>{{ results.summary }}</p>
+      </div>
+      <div class="metrics">
+        <div class="metric-card">
+          <span>Candidate Pool</span>
+          <strong>{{ results.metrics.candidate_pool }}</strong>
+        </div>
+        <div class="metric-card">
+          <span>Positive Labels</span>
+          <strong>{{ results.metrics.positive_examples }}</strong>
+        </div>
+        <div class="metric-card">
+          <span>Negative Labels</span>
+          <strong>{{ results.metrics.negative_examples }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-grid">
+      {% for movie in results.recommendations %}
+      <article class="movie-card">
+        <div class="movie-card-header">
+          <div class="movie-title-block">
+            <h3>{{ movie.title }}</h3>
+            <p class="movie-year">{{ movie.year }}</p>
+          </div>
+          <div class="score-badge">
+            <span>Score</span>
+            <strong>{{ movie.recommendation_score }}%</strong>
+          </div>
+        </div>
+        <p class="movie-genres">{{ movie.genre_display }}</p>
+        <div class="movie-meta">
+          <span>IMDb {{ movie.imdb_rating }}</span>
+          <span>Popularity {{ movie.popularity }}</span>
+        </div>
+        <p class="movie-reason">{{ movie.reason }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

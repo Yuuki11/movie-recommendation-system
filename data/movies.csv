@@ -1,0 +1,25 @@
+movie_id,title,genres,year,imdb_rating,popularity
+1,The Matrix,Action|Sci-Fi,1999,8.7,95
+2,Inception,Action|Adventure|Sci-Fi,2010,8.8,94
+3,Interstellar,Adventure|Drama|Sci-Fi,2014,8.7,92
+4,The Dark Knight,Action|Crime|Drama,2008,9.0,98
+5,La La Land,Comedy|Drama|Romance,2016,8.0,82
+6,Get Out,Horror|Mystery|Thriller,2017,7.8,84
+7,Mad Max: Fury Road,Action|Adventure|Sci-Fi,2015,8.1,88
+8,Toy Story,Animation|Adventure|Comedy,1995,8.3,86
+9,Spirited Away,Animation|Adventure|Fantasy,2001,8.6,85
+10,The Grand Budapest Hotel,Adventure|Comedy|Drama,2014,8.1,80
+11,Parasite,Comedy|Drama|Thriller,2019,8.5,90
+12,Whiplash,Drama|Music,2014,8.5,83
+13,The Conjuring,Horror|Mystery|Thriller,2013,7.5,76
+14,Knives Out,Comedy|Crime|Mystery,2019,7.9,81
+15,Arrival,Drama|Mystery|Sci-Fi,2016,7.9,78
+16,Black Panther,Action|Adventure|Sci-Fi,2018,7.3,87
+17,Little Women,Drama|Romance,2019,7.8,74
+18,Coco,Animation|Adventure|Family,2017,8.4,88
+19,The Social Network,Biography|Drama,2010,7.8,73
+20,Ford v Ferrari,Action|Biography|Drama,2019,8.1,79
+21,Blade Runner 2049,Drama|Mystery|Sci-Fi,2017,8.0,77
+22,Shutter Island,Mystery|Thriller,2010,8.2,82
+23,A Quiet Place,Drama|Horror|Sci-Fi,2018,7.5,75
+24,Paddington 2,Adventure|Comedy|Family,2017,7.8,70
